@@ -280,7 +280,7 @@ function renderFrame(ctx, frame, s, prev, alpha) {
           pF = pp;
           pBH = pp ? 50 : 0;
         }
-        if (pH && pF) {
+        if (head && feet && pH && pF) {
           const k = alpha;
           head = { x: pH.x + (head.x - pH.x) * k, y: pH.y + (head.y - pH.y) * k };
           feet = { x: pF.x + (feet.x - pF.x) * k, y: pF.y + (feet.y - pF.y) * k };
