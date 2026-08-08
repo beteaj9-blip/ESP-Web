@@ -301,20 +301,19 @@ function renderFrame(ctx, frame, s) {
       // }
     }
 
-    // estimated distance from the player's on-screen box size (close = big
-    // box = small number, far = small box = big number) - screen-based only
-    if (s.distance) {
-      const h = Math.max(bH, 6);
-      const est = Math.round(2000 / h);
-      const txt = `~${est}m`;
-      const tw = ctx.measureText(txt).width;
-      const dx = head.x - tw * 0.5;
-      const dy = feet.y + 6;
-      ctx.fillStyle = "rgba(0,0,0,0.45)";
-      roundedRect(ctx, dx - 4, dy - 12, tw + 8, 17, 4);
-      ctx.fill();
-      drawTextShadow(ctx, txt, dx, dy, "rgba(255,255,255,0.9)");
-    }
+    // distance label disabled for now
+    // if (s.distance) {
+    //   const h = Math.max(bH, 6);
+    //   const est = Math.round(2000 / h);
+    //   const txt = `~${est}m`;
+    //   const tw = ctx.measureText(txt).width;
+    //   const dx = head.x - tw * 0.5;
+    //   const dy = feet.y + 6;
+    //   ctx.fillStyle = "rgba(0,0,0,0.45)";
+    //   roundedRect(ctx, dx - 4, dy - 12, tw + 8, 17, 4);
+    //   ctx.fill();
+    //   drawTextShadow(ctx, txt, dx, dy, "rgba(255,255,255,0.9)");
+    // }
     }
   }
 }
