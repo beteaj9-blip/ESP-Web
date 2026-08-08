@@ -1,8 +1,8 @@
 import "./globals.css";
 
 export const metadata = {
-  title: "MRXCEPTION Web ESP",
-  description: "Knives Out Web ESP",
+  title: "MRXCEPTION",
+  description: "Knives Out",
 };
 
 export default function RootLayout({ children }) {

@@ -32,7 +32,7 @@ export default function LandingPage() {
               Connect
             </button>
           </div>
-          <div className="hint">The session token is shown in the loader overlay.</div>
+          <div className="hint">^_^</div>
         </div>
       </div>
     </div>
