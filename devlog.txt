@@ -1,0 +1,16 @@
+
+> knivesout-web-esp@1.0.0 dev
+> next dev
+
+   ▲ Next.js 15.5.23
+   - Local:        http://localhost:3000
+   - Network:      http://169.254.136.204:3000
+
+ ✓ Starting...
+ ✓ Ready in 1346ms
+ ○ Compiling / ...
+ ✓ Compiled / in 6.9s (547 modules)
+ GET / 200 in 7755ms
+ ○ Compiling /[session] ...
+ ✓ Compiled /[session] in 1568ms (546 modules)
+ GET /demo 200 in 2413ms
