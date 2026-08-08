@@ -237,10 +237,15 @@ function findLocalIdx(frame, s, m) {
   return regionIdx !== -1 ? regionIdx : bestIdx;
 }
 
-function renderFrame(ctx, frame, s) {
+function renderFrame(ctx, frame, s, prev, alpha) {
   ctx.clearRect(0, 0, frame.w, frame.h);
 
   const m = frame.m;
+  let prevMap = null;
+  if (prev && prev.p) {
+    prevMap = new Map();
+    for (const pe of prev.p) prevMap.set(pe.i, pe);
+  }
   const localIdx = findLocalIdx(frame, s, m);
   if (s.crosshair) drawCrosshair(ctx, frame, s);  if (s.espEnabled && frame.p && frame.p.length > 0) {
     for (const e of frame.p) {
@@ -259,6 +264,29 @@ function renderFrame(ctx, frame, s) {
       head = p;
       feet = p;
       bH = p ? 50 : 0;
+    }
+
+    // interpolate screen positions from the previous frame so the boxes glide
+    // smoothly even when frames arrive slowly over the network
+    if (prevMap && alpha > 0 && alpha < 1) {
+      const pe = prevMap.get(e.i);
+      if (pe) {
+        let pH = w2s(pe.x, pe.y + s.headOffset, pe.z, prev.m, frame.w, frame.h);
+        let pF = w2s(pe.x, pe.y - s.feetOffset, pe.z, prev.m, frame.w, frame.h);
+        let pBH = pF && pH ? pF.y - pH.y : 0;
+        if (!pH || !pF || pBH <= 2) {
+          const pp = w2s(pe.x, pe.y, pe.z, prev.m, frame.w, frame.h);
+          pH = pp;
+          pF = pp;
+          pBH = pp ? 50 : 0;
+        }
+        if (pH && pF) {
+          const k = alpha;
+          head = { x: pH.x + (head.x - pH.x) * k, y: pH.y + (head.y - pH.y) * k };
+          feet = { x: pF.x + (feet.x - pF.x) * k, y: pF.y + (feet.y - pF.y) * k };
+          bH = feet.y - head.y;
+        }
+      }
     }
 
     // behind camera -> never draw anything (mirrored indicators land on the
@@ -321,6 +349,9 @@ function renderFrame(ctx, frame, s) {
 export default function EspCanvas({ frameRef, settingsRef, onLive }) {
   const canvasRef = useRef(null);
   const seenRef = useRef(null);
+  const prevFrameRef = useRef(null);
+  const arrivalRef = useRef(0);
+  const prevArrivalRef = useRef(0);
   const lastSeenRef = useRef(0);
   const lastLiveCallRef = useRef(0);
   const liveStateRef = useRef(false);
@@ -334,12 +365,20 @@ export default function EspCanvas({ frameRef, settingsRef, onLive }) {
 
       // freshness is decided here, from the exact frames the canvas renders
       let fresh = false;
+      let alpha = 1;
       if (frame) {
         if (frame !== seenRef.current) {
+          prevFrameRef.current = seenRef.current;
+          prevArrivalRef.current = arrivalRef.current;
+          arrivalRef.current = now;
           seenRef.current = frame;
           lastSeenRef.current = now;
         }
         fresh = now - lastSeenRef.current < 2500;
+        const dt = arrivalRef.current - prevArrivalRef.current;
+        if (prevFrameRef.current && dt > 0 && dt < 2000) {
+          alpha = Math.min(1, (now - arrivalRef.current) / dt);
+        }
       }
 
       if (cv) {
@@ -349,7 +388,8 @@ export default function EspCanvas({ frameRef, settingsRef, onLive }) {
             cv.width = frame.w;
             cv.height = frame.h;
           }
-          renderFrame(ctx, frame, settingsRef.current);
+          const prev = alpha < 1 ? prevFrameRef.current : null;
+          renderFrame(ctx, frame, settingsRef.current, prev, alpha);
         } else {
           // stale or no frame -> wipe the canvas so stale ESP disappears
           ctx.clearRect(0, 0, cv.width, cv.height);
